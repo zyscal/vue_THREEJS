@@ -72,8 +72,8 @@
                     var xdatalist_font = document.getElementById("xdatalist");
                     var zdatalist_font = document.getElementById("zdatalist");
 
-                    this.xdata = (rotateGlobal.rotationx).toFixed(2);
-                    this.zdata = (rotateGlobal.rotationy).toFixed(2);
+                    this.xdata = (Number(rotateGlobal.rotationx)).toFixed(2);
+                    this.zdata = (Number(rotateGlobal.rotationy)).toFixed(2);
                     this.ydata = (this.mesh.rotation.y*180/3.14%360).toFixed(2);
 
                     this.xdatalist[count] = this.xdata;
@@ -157,13 +157,15 @@
             },
             animate(){
                 requestAnimationFrame(this.animate);
-                // this.mesh.rotation.x += 0.1;
-                // this.mesh.rotation.y += 0.1;
-                //     console.log(rotateGlobal.rotationx,rotateGlobal.rotationy)
-                    console.log(rotateGlobal.rotationx,rotateGlobal.rotationy)
-                    this.mesh.rotation.x = Number(rotateGlobal.rotationx)*3.14/180;
-                    this.mesh.rotation.z = Number(rotateGlobal.rotationy)*3.14/180;
-                    this.mesh.rotation.y += ( this.targetRotation -  this.mesh.rotation.y ) * 0.08;
+                // this.mesh.rotation.x = 0.275;
+                // this.mesh.rotation.y = 0.5;
+                // this.mesh.rotation.z = 0.275;
+                // console.log(rotateGlobal.rotationx,rotateGlobal.rotationy)
+
+                // console.log(rotateGlobal.rotationx,rotateGlobal.rotationy)
+                this.mesh.rotation.x = Number(rotateGlobal.rotationx)*3.14/180;
+                this.mesh.rotation.z = Number(rotateGlobal.rotationy)*3.14/180;
+                this.mesh.rotation.y += ( this.targetRotation -  this.mesh.rotation.y ) * 0.08;
                 this.renderer.render(this.scene, this.camera);
             },
                 onDocumentMouseDown( event ) {

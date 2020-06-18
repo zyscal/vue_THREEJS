@@ -17,7 +17,7 @@
             <el-table-column label="设备状态" prop="state" align="center" width="80px"></el-table-column>
             <el-table-column label="路由IP" prop="router_IPv6" align="center" width="135px"></el-table-column>
             <el-table-column label="传感器数" prop="sensor_num" align="center" width="80px"></el-table-column>
-            <el-table-column label="最后通讯" prop="last_comm" width="105px" align="center"></el-table-column>
+<!--            <el-table-column label="最后通讯" prop="last_comm" width="105px" align="center"></el-table-column>-->
             <el-table-column label="注册时间" prop="register"  align="center"></el-table-column>
             <el-table-column label="所属电网线路"  align="center" width="135px">
                 <template slot-scope="scope">

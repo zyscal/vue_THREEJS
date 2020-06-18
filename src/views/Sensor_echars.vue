@@ -1,7 +1,7 @@
 <template>
     <div height="840px" width="800px">
         <el-header style="background-color: #ffffff;margin-left: 25px;margin-right: 25px;border-bottom: 1px solid rgb(28, 202, 213);">
-            <el-select v-model="value1" placeholder="请选择" style="">
+            <el-select v-model="value1" placeholder="请选择终端设备" style="">
                 <el-option
                         v-for="item in options1"
                         :key="item.value"
@@ -9,7 +9,7 @@
                         :value="item.value">
                 </el-option>
             </el-select>
-            <el-select v-model="value2" placeholder="请选择" style="margin-left: 25px">
+            <el-select v-model="value2" placeholder="请选择监控内容" style="margin-left: 14px">
                 <el-option
                         v-for="item in options2"
                         :key="item.value"
@@ -17,7 +17,7 @@
                         :value="item.value">
                 </el-option>
             </el-select>
-            <el-select v-model="value3" placeholder="请选择" style="margin-left:  25px">
+            <el-select v-model="value3" placeholder="请选择监控模式" style="margin-left:  14px">
                 <el-option
                         v-for="item in options3"
                         :key="item.value"
@@ -25,8 +25,13 @@
                         :value="item.value">
                 </el-option>
             </el-select>
-            <el-button type="primary" @click="handleonclick(value1,value2,value3)" style="margin-left: 25px">查询</el-button>
-            <el-button type="danger" @click="nowvalue1 = null,nowvalue2 = null" style="margin-left: 25px">停止本次查询</el-button>
+            <el-date-picker style="margin-left:  14px"
+                    v-model="dataofselect"
+                    type="date"
+                    placeholder="选择日期">
+            </el-date-picker>
+            <el-button type="primary" @click="handleonclick(value1,value2,value3)" style="margin-left: 14px">查询</el-button>
+            <el-button type="danger" @click="nowvalue1 = null,nowvalue2 = null" style="margin-left: 14px">停止</el-button>
         </el-header>
 
         <div  ref="bar_dv"  style="width:96%;height: 600px; margin-left: 25px;margin-top: 20px"></div>
@@ -47,6 +52,7 @@
                 Press680data:[],
                 Hum680data:[],
                 numofdata:0,
+                dataofselect:null,
                 options1:[],
                 options2:[
                     {
@@ -104,8 +110,8 @@
             console.log("created");
         },
             methods: {
-                handleonclick(value1,value2,value3){
-                    console.log(value1,value2,value3);
+                    handleonclick(value1,value2,value3){
+
 
                     if(value1 == null && value2 == null)
                     {
@@ -137,7 +143,20 @@
                                 switch (value2) {
                                     case '1281BCurrent':/*电流表*/
                                     {
-                                        var url = 'http://localhost:8181/Sensor_Data/' + value1 +'/all1281BCurrent';
+                                        var url = 'http://localhost:8181/Sensor_Data/' + value1 +'/all1281BCurrent/';
+                                        if(this.dataofselect == null){
+                                            url += "null";
+                                        }else{
+                                           // this.dataofselect.getFullYear(),this.dataofselect.getMonth()+1,this.dataofselect.getDate()
+                                            var month = this.dataofselect.getMonth()+1
+                                            if(month < 10)
+                                                month = "0"+month;
+                                            var Date = this.dataofselect.getDate();
+                                            if(Date < 10)
+                                                Date = "0" + Date;
+                                            url += this.dataofselect.getFullYear() + "-"+month+"-"+Date;
+                                        }
+                                        console.log(url)
                                         const _this = this;
                                         axios.get(url).then(
                                             function (data) {
@@ -145,7 +164,13 @@
                                                     console.log(data.data);
                                                     _this.data = [];
                                                     for(var i = 0;i<data.data.length;i++){
-                                                        _this.data.push([data.data[i].sensor_time,data.data[i].sensor_data]);
+                                                        if(i > 0){//从第二个数开始，如果时间重复则抛弃后面的
+                                                            if(_this.data[_this.data.length - 1][0] != data.data[i].sensor_time){
+                                                                _this.data.push([data.data[i].sensor_time,data.data[i].sensor_data]);
+                                                            }
+                                                        }else {
+                                                            _this.data.push([data.data[i].sensor_time,data.data[i].sensor_data]);
+                                                        }
                                                     }
                                                 }
                                             })
@@ -153,7 +178,19 @@
                                     }
                                     case 'TEMP':/*温度表*/
                                     {
-                                        var url = 'http://localhost:8181/Sensor_Data/' + value1 +'/all1281BTemp';
+                                        var url = 'http://localhost:8181/Sensor_Data/' + value1 +'/all1281BTemp/';
+                                        if(this.dataofselect == null){
+                                            url += "null";
+                                        }else{
+                                            // this.dataofselect.getFullYear(),this.dataofselect.getMonth()+1,this.dataofselect.getDate()
+                                            var month = this.dataofselect.getMonth()+1
+                                            if(month < 10)
+                                                month = "0"+month;
+                                            var Date = this.dataofselect.getDate();
+                                            if(Date < 10)
+                                                Date = "0" + Date;
+                                            url += this.dataofselect.getFullYear() + "-"+month+"-"+Date;
+                                        }
                                         const _this = this;
                                         this.Temp1281Bdata = [];//清空缓冲区
                                         this.Temp680data = [];//清空680缓冲区
@@ -161,16 +198,41 @@
                                             function (data) {
                                                 if(data.data != null && data.data != ""){
                                                     for(var i = 0;i<data.data.length;i++){
-                                                        _this.Temp1281Bdata.push([data.data[i].sensor_time,data.data[i].sensor_data]);
+                                                        if(i > 0){//从第二个数开始，如果时间重复则抛弃后面的
+                                                            if(_this.Temp1281Bdata[_this.Temp1281Bdata.length - 1][0] != data.data[i].sensor_time){
+                                                                _this.Temp1281Bdata.push([data.data[i].sensor_time,data.data[i].sensor_data]);
+                                                            }
+                                                        }else {
+                                                            _this.Temp1281Bdata.push([data.data[i].sensor_time,data.data[i].sensor_data]);
+                                                        }
                                                     }
                                                 }
                                             })
-                                        url = 'http://localhost:8181/Sensor_Data/' + value1 +'/all680Temp';
+                                        url = 'http://localhost:8181/Sensor_Data/' + value1 +'/all680Temp/';
+                                        if(this.dataofselect == null){
+                                            url += "null";
+                                        }else{
+                                            // this.dataofselect.getFullYear(),this.dataofselect.getMonth()+1,this.dataofselect.getDate()
+                                            var month = this.dataofselect.getMonth()+1
+                                            if(month < 10)
+                                                month = "0"+month;
+                                            var Date = this.dataofselect.getDate();
+                                            if(Date < 10)
+                                                Date = "0" + Date;
+                                            url += this.dataofselect.getFullYear() + "-"+month+"-"+Date;
+
+                                        }
                                         axios.get(url).then(
                                             function (data) {
                                                 if(data.data != null && data.data != ""){
                                                     for(var i = 0;i<data.data.length;i++){
-                                                        _this.Temp680data.push([data.data[i].sensor_time,data.data[i].sensor_data]);
+                                                        if(i > 0){//从第二个数开始，如果时间重复则抛弃后面的
+                                                            if(_this.Temp680data[_this.Temp680data.length - 1][0] != data.data[i].sensor_time){
+                                                                _this.Temp680data.push([data.data[i].sensor_time,data.data[i].sensor_data]);
+                                                            }
+                                                        }else {
+                                                            _this.Temp680data.push([data.data[i].sensor_time,data.data[i].sensor_data]);
+                                                        }
                                                     }
                                                 }
                                             })
@@ -179,27 +241,72 @@
 
                                     case 'HUMandPRESS':/*气压湿度表 20200425 周六 终于写到你了 即将结束 88*/
                                     {
-                                        var url = 'http://localhost:8181/Sensor_Data/' + value1 +'/all680Hum';
+                                        var url = 'http://localhost:8181/Sensor_Data/' + value1 +'/all680Hum/';
+                                        if(this.dataofselect == null){
+                                            url += "null";
+                                        }else{
+                                            // this.dataofselect.getFullYear(),this.dataofselect.getMonth()+1,this.dataofselect.getDate()
+                                            var month = this.dataofselect.getMonth()+1
+                                            if(month < 10)
+                                                month = "0"+month;
+                                            var Date = this.dataofselect.getDate();
+                                            if(Date < 10)
+                                                Date = "0" + Date;
+                                            url += this.dataofselect.getFullYear() + "-"+month+"-"+Date;
+
+                                        }
                                         this.Hum680data = [];
                                         this.Press680data = [];
                                         const _this = this;
+                                        console.log(url);
                                         axios.get(url).then(
                                             function (data) {
                                                 if(data.data != null && data.data != ""){
                                                     console.log(data.data);
                                                     for(var i = 0;i<data.data.length;i++){
 
-                                                        _this.Hum680data.push([data.data[i].sensor_time,data.data[i].sensor_data]);
+                                                        if(i > 0){//从第二个数开始，如果时间重复则抛弃后面的
+                                                            if(_this.Hum680data[_this.Hum680data.length - 1][0] != data.data[i].sensor_time){
+                                                                _this.Hum680data.push([data.data[i].sensor_time,data.data[i].sensor_data]);
+                                                            }
+                                                        }else {
+                                                            _this.Hum680data.push([data.data[i].sensor_time,data.data[i].sensor_data]);
+                                                        }
+
                                                     }
                                                 }
                                             })
-                                        url = 'http://localhost:8181/Sensor_Data/' + value1 +'/all680Pre';
+                                        url = 'http://localhost:8181/Sensor_Data/' + value1 +'/all680Pre/';
+                                        if(this.dataofselect == null){
+                                            url += "null";
+                                        }else{
+                                            // this.dataofselect.getFullYear(),this.dataofselect.getMonth()+1,this.dataofselect.getDate()
+                                            var month = this.dataofselect.getMonth()+1
+                                            if(month < 10)
+                                                month = "0"+month;
+                                            var Date = this.dataofselect.getDate();
+                                            if(Date < 10)
+                                                Date = "0" + Date;
+                                            url += this.dataofselect.getFullYear() + "-"+month+"-"+Date;
+
+                                        }
+                                        console.log(url);
                                         axios.get(url).then(
                                             function (data) {
                                                 if(data.data != null && data.data != ""){
                                                     console.log(data.data);
                                                     for(var i = 0;i<data.data.length;i++){
-                                                        _this.Press680data.push([data.data[i].sensor_time,data.data[i].sensor_data]);
+
+                                                        if(i > 0){//从第二个数开始，如果时间重复则抛弃后面的
+                                                            if(_this.Press680data[_this.Press680data.length - 1][0] != data.data[i].sensor_time){
+                                                                _this.Press680data.push([data.data[i].sensor_time,data.data[i].sensor_data]);
+                                                            }
+                                                        }else {
+                                                            _this.Press680data.push([data.data[i].sensor_time,data.data[i].sensor_data]);
+                                                        }
+
+
+
                                                     }
                                                 }
                                             })
@@ -216,6 +323,11 @@
                         {
                             /*重复选择*/
                             console.log("4")
+                            this.data = [];
+                            this.Temp680data = [];
+                            this.Temp1281Bdata = [];
+                            this.Press680data = [];
+                            this.Hum680data = [];
                         }
                         else{
                             /*非重复选择*/
@@ -238,7 +350,6 @@
                             //清空表格缓冲区
 
                             /////
-
                             switch (this.nowvalue2) {
                                 case '1281BCurrent':/*电流表*/
                                 {
@@ -305,6 +416,7 @@
                         console.log("enter into handleHumandPre");
                         var url = 'http://localhost:8181/Sensor_Data/' + value1 +'/HumandPre';
                         const _this = this;
+                        if(this.value3 != "all")
                         axios.get(url).then(
                             function (data) {
                                 console.log(data.data)
@@ -315,99 +427,98 @@
                                 }
                             })
 
-                        console.log("before ecahrts!!!!",this.Hum680data)
                         this.myChart = echarts.init(this.$refs.bar_dv);
                         // this.myChart = echarts.init(document.getElementById("main"));
 
+
                         var option = {
-                            title: {
-                                text: '动态数据',
-                            },
                             tooltip: {
                                 trigger: 'axis',
-                            },
-                            legend: {
-                                data:['最新成交价', '预购队列']
+                                // axisPointer: {
+                                //     type: 'cross',
+                                //     crossStyle: {
+                                //         color: '#999'
+                                //     }
+                                // }
                             },
                             toolbox: {
-                                show: true,
                                 feature: {
                                     dataZoom: {
                                         yAxisIndex: 'none'
                                     },
-                                    dataView: {readOnly: false},
-                                    magicType: {type: ['line', 'bar']},
                                     restore: {},
                                     saveAsImage: {}
                                 }
                             },
-                            dataZoom: [{
-
-                            }, {
-                                type: 'inside'
-                            }],
+                                legend: {
+                                    data:['湿度', '大气压强']
+                                },
                             xAxis: [
                                 {
-                                    type: 'category',
-                                    data: this.Hum680data.map(function (item) {
-                                        return item[0];
-                                    })
-                                },
-                                // {
-                                //     type: 'category',
-                                //     boundaryGap: false,
-                                //     data: this.Press680data.map(function (item) {
-                                //         return item[0];
-                                //     })
-                                // }
+                                    type:'time',
+                                    splitNumber:24
+                                }
                             ],
                             yAxis: [
                                 {
                                     type: 'value',
                                     name: '湿度',
-                                    max: 100,
                                     min: 0,
-                                    axisLabel: {
-                                        formatter: '{value} %'
-                                    }
+                                    max: 100,
+                                    // interval: 50,
                                 },
-                                // {
-                                //     type: 'value',
-                                //     // scale: true,
-                                //     name: '大气压强',
-                                //      max: 101.6,
-                                //      min: 101,
-                                // }
+                                {
+                                    type: 'value',
+                                    name: '大气压强',
+                                    min: 102.2,
+                                    max: 102,
+                                    // interval: 5,
+                                }
                             ],
+                                dataZoom: [{
+
+                                }, {
+                                    type: 'inside'
+                                }],
                             series: [
                                 {
-                                    name: '大气湿度',
+                                    name: '湿度',
                                     type: 'bar',
-                                    // xAxisIndex: 1,
-                                    // yAxisIndex: 1,
+                                    data: this.Hum680data,
                                     showBackground: true,
-                                    backgroundStyle: {
-                                        color: 'rgba(220, 220, 220, 0.8)'
-                                    },
-                                    data: this.Hum680data.map(function (item) {
-                                        return item[1];
-                                    })
+                                    yAxisIndex: 0,
+                                    backgroundStyle: {color: 'rgba(220, 220, 220, 0.8)'},
                                 },
-                                // {
-                                //     name: '大气压强',
-                                //     type: 'line',
-                                //     data: this.Press680data.map(function (item) {
-                                //         return item[1];
-                                //     })
-                                // }
+                                {
+                                    name: '大气压强',
+                                    type: 'line',
+                                    data: this.Press680data,
+                                    yAxisIndex: 1,
+                                    symbol: 'none',
+                                    lineStyle:{
+                                        normal:{
+                                            color:"#000000",
+                                            width:1,
+                                        }
+                                    }
+
+                                                // itemStyle: {
+                                                //     normal: {
+                                                //         color: '#8cd5c2', //改变折线点的颜色
+                                                //         lineStyle: {
+                                                //             color: '#0000ff' //改变折线颜色
+                                                //         }
+                                                //     }
+                                                // },
+                                }
                             ]
                         };
-
-
                         this.myChart.setOption(option);
-                        setTimeout(() =>{
-                            this.handleHumandPre(value1,value2);
-                        },this.echarts_speed);
+                            setTimeout(() =>{
+                                this.handleHumandPre(value1,value2);
+                            },this.echarts_speed);
+
+
                     }
                 },
                 handleTemps(value1,value2){//参数目的：当当前value1或value2改变时结束本次循环
@@ -417,6 +528,8 @@
                         console.log("enter into handle1281BTemp");
                         var url = 'http://localhost:8181/Sensor_Data/' + value1 +'/Temp';
                         const _this = this;
+
+                        if(this.value3 != "all")
                         axios.get(url).then(
                             function (data) {
                                 console.log(data.data)
@@ -457,11 +570,8 @@
                                 type: 'inside'
                             }],
                             xAxis: {
-                                type: 'category',
-                                boundaryGap: false,
-                                data: this.Temp1281Bdata.map(function (item) {
-                                    return item[0];
-                                })
+                                type:'time',
+                                splitNumber:24
                             },
                             yAxis: {
                                 min:10,
@@ -476,11 +586,9 @@
                                 {
                                     name: '最高气温',
                                     type: 'line',
+                                    symbol: 'none',
                                     smooth: true,
-                                    data: this.Temp1281Bdata.map(function (item) {
-                                        return item[1];
-                                    }),
-                                    areaStyle: {},
+                                    data:this.Temp1281Bdata,
                                     markPoint: {
                                         data: [
                                             {type: 'max', name: '最大值'},
@@ -491,16 +599,20 @@
                                         data: [
                                             {type: 'average', name: '平均值'}
                                         ]
-                                    }
+                                    },
+                                    areaStyle: {
+                                        normal: {
+                                            color: '#8cd5c2' //改变区域颜色
+                                        }
+                                    },
                                 },
                                 {
                                     name: '最低气温',
 
                                     type: 'line',
+                                    symbol: 'none',
                                     smooth: true,
-                                    data: this.Temp680data.map(function (item) {
-                                        return item[1];
-                                    }),
+                                    data:this.Temp680data,
                                     areaStyle: {
                                         color: ['rgba(250,250,250,0.3)','rgba(200,200,200,0.3)']
                                     },
@@ -531,9 +643,12 @@
                             ]
                         };
                         this.myChart.setOption(option);
-                        setTimeout(() =>{
-                            this.handleTemps(value1,value2);
-                        },this.echarts_speed);
+
+                            setTimeout(() =>{
+                                this.handleTemps(value1,value2);
+                            },this.echarts_speed);
+
+
                     }
                 },
                 handle1218BCurrent(value1,value2)
@@ -549,13 +664,14 @@
                         console.log("echarts")
                         var url = 'http://localhost:8181/Sensor_Data/' + value1 +'/1281BCurrent';
                         const _this = this;
+                        if(this.value3 != "all")
                         axios.get(url).then(
                             function (data) {
                                 if(data.data!=null)
                                 {
                                     console.log("请求的数据是：",data.data);
-                                    _this.data.push([data.data.sensor_time,data.data.sensor_data]);
-                                    _this.numofdata++;
+                                        _this.data.push([data.data.sensor_time,data.data.sensor_data]);
+                                        _this.numofdata++;
                                 }
                             })
 
@@ -577,9 +693,15 @@
                                 trigger: 'axis'
                             },
                             xAxis: {
-                                data: this.data.map(function (item) {
-                                    return item[0];
-                                })
+
+                                ////
+                                type:'time',
+                                splitNumber:24
+                                ////
+
+                                // data: this.data.map(function (item) {
+                                //     return item[0];
+                                // })
                             },
                             yAxis: {
                                 splitLine: {
@@ -597,7 +719,6 @@
                                 }
                             },
                             dataZoom: [{
-
                             }, {
                                 type: 'inside'
                             }],
@@ -637,9 +758,11 @@
                                 {
                                     name: '1281B_Current',
                                     type: 'line',
-                                    data: this.data.map(function (item) {
-                                        return item[1];
-                                    }),
+                                    symbol: 'none',
+                                    data:this.data,
+                                    // data: this.data.map(function (item) {
+                                    //     return item[1];
+                                    // }),
                                     markLine: {
                                         silent: true,
                                         data: [{
@@ -663,7 +786,6 @@
                         },this.echarts_speed);
 
                 }
-
                 },
 
         mounted() {

@@ -198,25 +198,29 @@
                                     orient: 'BT',
                                     // layout: 'radial',
                                     symbol: 'emptyCircle',
-                                    symbolSize: 7,
+                                    symbolSize: 13,
                                     initialTreeDepth: _this.form2.treedepth,
                                     animationDurationUpdate: 750,
                                     label: {
                                         position: 'bottom',
                                         verticalAlign: 'middle',
                                         align: 'right',
-                                        fontSize: 12
+                                        fontSize: 14
                                     },
                                     leaves:{
                                         label: {
                                             position: 'top',
                                             rotate: 90,
                                             verticalAlign: 'middle',
-                                            align: 'left'
+                                            align: 'left',
+                                            // fontSize:50
                                         }
                                     },
                                     root:{
-
+                                        label:{
+                                            fontSize:50
+                                        },
+                                        fontSize:50
                                     }
                                 },
                             )

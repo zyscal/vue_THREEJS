@@ -145,6 +145,8 @@
                         trigger: 'item',
                         triggerOn: 'mousemove'
                     },
+
+
                     series: [
                         {
                             right:'15%',
@@ -152,15 +154,22 @@
                             data: this.datatree.nodes,
                             links: this.datatree.links,
                             focusNodeAdjacency: true,
+                            label: {
+                                normal: {
+                                    textStyle: {
+                                        fontSize: 20
+                                    }
+                                }
+                            },
                             levels: [{
                                 depth: 0,
                                 itemStyle: {
-                                    color: '#fbb4ae'
+                                    color: '#fbb4ae',
                                 },
                                 lineStyle: {
                                     color: 'source',
                                     opacity: 0.6
-                                }
+                                },
                             }, {
                                 depth: 1,
                                 itemStyle: {
@@ -173,7 +182,7 @@
                             }, {
                                 depth: 2,
                                 itemStyle: {
-                                    color: '#ccebc5'
+                                    color: '#ccebc5',
                                 },
                                 lineStyle: {
                                     color: 'source',

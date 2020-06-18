@@ -53,8 +53,22 @@
             <div slot="footer" class="dialog-footer">
                 <el-button @click="dialogFormVisible2 = false"  >取 消</el-button>
                 <el-button type="primary" @click="dialogFormVisible2 = false,handle_newrouter()">确 定</el-button>
+    </div>
+        </el-dialog>
+
+        <el-dialog title="修改路由设备名称" :visible.sync="dialogFormVisible" style="width: 1100px; margin: auto">
+            <el-form :model="form">
+                <el-form-item label="新的名称：">
+                    <el-input v-model="form.router_name"></el-input>
+                </el-form-item>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+                <el-button @click="dialogFormVisible = false" >取 消</el-button>
+                <el-button type="primary" @click="dialogFormVisible = false,handle_changroutername()">确 定</el-button>
             </div>
         </el-dialog>
+
+
 
     </div>
 </template>
@@ -79,7 +93,7 @@
                         total_terminal:''
                     }
                 ],
-
+                dialogFormVisible:false,
                 dialogFormVisible2:false,
                 form:{
                     router_name:"",
@@ -163,13 +177,11 @@
             Refresh(){
                 window.location.reload();
             },
-            handle_changroutername(index, row) {
+            handle_changroutername() {
                 console.log(this.form.router_IPv6,this.form.router_name);
                 //此处进行数据库修改
                  var ask = "/router/"+this.form.router_IPv6+"/"+this.form.router_name;
                 const _this = this;
-                const _index = index;
-                const _row = row;
                 axios.get('http://localhost:8181'+ask).then(
                     function (data) {
                        console.log("the ask request:"+data.data);
